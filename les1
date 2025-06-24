@@ -1,0 +1,226 @@
+-- занятие от 16.06.2025
+-- вывести все поля таблицы
+SELECT *
+FROM clients_churn;
+
+-- вывести первые 10 строк таблицы
+SELECT *
+from clients_churn
+limit 10;
+
+-- выбрать столбцы
+SELECT user_id, city, gender, age, churn
+from clients_churn;
+
+-- занятие от 18.06.2025
+
+SELECT 1+1;
+
+-- псевдонимы столбцов
+
+-- вывести столбцы с ноавми именами: score -> балл, city -> город
+SELECT score as 'скоринговый балл', city AS 'город' -- пробелы использовать нельзя
+from clients_churn
+LIMIT 2;
+
+-- псевдонимы таблиц
+
+SELECT clients.score AS 'скоринговый балл',
+       clients.city AS 'город'
+from clients_churn as clients
+LIMIT 2;
+
+-- ABS, AVG, COUNT, MAX, MIN, ROUND, SUM
+-- найти минимальное, максималььное и выборочное среднее по столбцу 'estimated_salary'
+
+SELECT min(estimated_salary) as 'минимальное значение дохода',
+       max(estimated_salary) as 'максимальное значение дохода',
+       avg(estimated_salary) as 'выборочное среднее значение дохода',
+       round(sum(estimated_salary) / COUNT(*), 2) as 'округление'
+from clients_churn;
+
+-- создать новый столбец 'nalog', значение которого рассчитываются
+-- по след ф.: nalog=0.13*estimated_salary
+
+SELECT estimated_salary,
+       round(0.13*estimated_salary, 2) as nalog
+from clients_churn;
+
+
+-- подсчитать количество строк в таблице
+
+SELECT COUNT(*)
+FROM clients_churn;
+
+
+-- подсчитать количество уникальных значений для столбцов 'age'
+
+SELECT COUNT(DISTINCT gender)
+FROM clients_churn;
+
+
+-- занятие от 20.06.25
+
+/*
+5.6.6 отбор строк
+шаблон запроса
+SELECT [DISTINCT | ALL] поля_таблицы
+FROM список_таблиц
+[WHERE условия_на_ограничения_строк]
+
+*/
+
+-- задание: вывести список клиентов банка, проживающих в "Город_Р";
+SELECT *
+FROM clients_churn
+WHERE city = 'Город_Р';
+
+-- проверка:
+SELECT DISTINCT city
+FROM clients_churn
+WHERE city = 'Город_Р';
+
+-- вывести имеющих доход больше 20000;
+SELECT *
+FROM clients_churn
+WHERE estimated_salary > 20000;
+
+-- проверка:
+SELECT min(estimated_salary)
+FROM clients_churn
+WHERE estimated_salary > 20000;
+
+-- вывести список клиентов банка, проживающих в "Город_Р" и имеющих доход больше 20000;
+SELECT *
+FROM clients_churn
+WHERE city = 'Город_Р' and estimated_salary > 20000;
+
+-- проверка:
+SELECT *
+FROM clients_churn
+WHERE city = 'Город_Р' AND estimated_salary > 20000;
+
+
+-- проверочное задание
+-- найдем всех женщин, имеющих средний доход больше 50000 или коллич объект недвиж более 2
+
+SELECT *
+FROM clients_churn
+WHERE gender = 'Ж' AND ((estimated_salary > 50000) or (objects > 2));
+
+-- проверка на пол
+SELECT DISTINCT gender
+FROM clients_churn;
+
+-- проверка кол-во клиентов
+SELECT COUNT(*) -- 4255
+FROM clients_churn
+WHERE gender = 'Ж' AND ((estimated_salary > 50000) or (objects > 2));
+
+
+/*
+5.6.6.2 Проверка на принадлежность к диапазону
+условие BETWEEN ... AND используется для извлечений дапазона
+шаблон запроса:
+SELECT [DISTINCT | ALL] поля_таблиц
+FROM список_таблиц
+[WHERE столбец или выражение BETWEEN нижняя_граница AND верхняя_граница;]
+*/
+
+-- вывести список клиентов банка, проживающих в "Городе_Р" в возрасте от 35 до 50 лет
+
+SELECT *
+FROM clients_churn
+WHERE city = 'Город_Р' and (age BETWEEN 35 and 50);
+
+
+/*
+5.6.6.3 проверка наличия во множестве
+распространенным условием отбора является проверка на наличие во множестве. для этого применяется оп
+шаблон запроса:
+SELECT [DISTINCT | ALL] поля_таблиц
+FROM список_таблиц
+[WHERE столбец IN (value1, value2, ..., value_n);]
+Задание: вывести список клиентов банка, проживающих в "Город_Р" и в возрасте либо 35, либо 50 лет
+*/
+
+SELECT *
+FROM clients_churn
+where city = 'Город_Р' and age in (35, 50);
+
+-- проверка
+SELECT DISTINCT age, city
+FROM clients_churn
+where city = 'Город_Р' and (age in (35, 50));
+
+-- проверка городов
+SELECT DISTINCT city
+FROM clients_churn;
+
+-- клиенты не проживающие в
+SELECT *
+FROM clients_churn
+where city not in ('Город_Р', 'Город_Я');
+
+
+-- занятие от 23.06.2025
+-- 5.6.6.4  на сответствие шаблону
+
+/* Шаблон запроса:
+SELECT [DISTINCT | ALL] поля_таблиц
+FROM список_таблиц
+[WHERE столбец LIKE шаблон;]
+*/
+
+-- найти всех клиентов, проживающих в Ярославле
+-- уникальные значения
+SELECT DISTINCT city
+FROM clients_churn;
+
+-- решение задачи
+SELECT *
+FROM clients_churn
+where city LIKE '%Я';
+
+-- 'Яр_славл_' - _ не знаешь какие буквы
+-- 'Ярославл%' - непонятно сколько букв в конце и какие
+
+-- проверка
+SELECT DISTINCT city
+FROM clients_churn
+where (city LIKE '%я') or (city LIKE '%Я');
+
+/* найти всех клиентов на -Строев
+SELECT *
+FROM clients_churn
+WHERE (clients LIKE 'Строе%' OR (clients LIKE '% Строев_');
+*/
+
+-- 5.6.6.5 проверка на равенство значения NULL
+/*
+Шаблон запроса:
+SELECT [DISTINCT | ALL] поля_таблиц
+FROM список_таблиц
+[WHERE столбец IS NULL;]
+*/
+
+-- посчитать количество пропущенных записей в признаке balance
+SELECT COUNT(*)
+FROM clients_churn
+where balance is NULL;
+
+-- посчитать количество не пропущенных записей в признаке balance
+
+SELECT COUNT(*)
+from clients_churn
+where balance is not NULL;
+
+
+-- работа с пропусками
+-- найди выборочное среднее по балансу -- balance
+
+
+
+
+
+
